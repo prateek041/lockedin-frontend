@@ -62,10 +62,7 @@ export function ProblemWrapper() {
   };
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="h-screen max-h-screen"
-    >
+    <ResizablePanelGroup direction="horizontal" className="h-full">
       {/* Problem Description Panel */}
       <ResizablePanel defaultSize={40} minSize={25}>
         <Question />

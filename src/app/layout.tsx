@@ -18,9 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.className} antialiased mt-2 h-screen`}
-      >
+      <body className={`${inter.className} antialiased h-screen flex flex-col`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -28,7 +26,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          {children}
+          {/* Add a spacer div to account for the fixed navbar height */}
+          <div className="h-14"></div>
+          <main className="flex-grow">{children}</main>
         </ThemeProvider>
       </body>
     </html>

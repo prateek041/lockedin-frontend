@@ -1,11 +1,11 @@
-import { ProblemWrapper } from "@/components/Problem"
+import { ProblemWrapper } from "@/components/Problem";
 
 const ProblemPage = () => {
   return (
-    <div className="h-full p-2">
+    <div className="h-[calc(100vh-3.5rem)]">
       <ProblemWrapper />
     </div>
-  )
-}
+  );
+};
 
-export default ProblemPage
+export default ProblemPage;
