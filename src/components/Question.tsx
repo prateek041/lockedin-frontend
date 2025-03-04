@@ -21,8 +21,6 @@ const exampleProblem = {
   difficulty: "Easy",
   tags: ["Array", "Hash Table"],
   description: `
-## Problem Statement
-
 Given an array of integers \`nums\` and an integer \`target\`, return indices of the two numbers such that they add up to \`target\`.
 
 You may assume that each input would have **exactly one solution**, and you may not use the same element twice.
@@ -131,7 +129,7 @@ export default function Question() {
   // Custom components for markdown rendering with proper TypeScript typing
   const markdownComponents: Components = {
     h2: ({ children }) => (
-      <h2 className="text-xl font-semibold mt-8 mb-4">{children}</h2>
+      <h2 className="text-xl font-semibold mb-4">{children}</h2>
     ),
     h3: ({ children }) => (
       <h3 className="text-lg font-medium mt-6 mb-3">{children}</h3>
@@ -249,7 +247,7 @@ export default function Question() {
       <Card className="rounded-none h-full border-0">
         <CardHeader className="sticky top-0 z-10 bg-card border-b">
           <div className="flex mb-2 justify-between items-start">
-            <div>
+            <div className="mb-4">
               <CardTitle>
                 <h1 className="font-bold tracking-tighter text-2xl">
                   {exampleProblem.title}
@@ -281,72 +279,38 @@ export default function Question() {
             </div>
           </div>
         </CardHeader>
-        <ScrollArea className="h-[calc(100vh-11rem)]">
-          <Tabs defaultValue="description" className="px-6 py-4">
-            <TabsList>
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="hints">Hints</TabsTrigger>
-              <TabsTrigger value="solution">Solution</TabsTrigger>
-            </TabsList>
+        <ScrollArea className="h-[calc(100vh-11rem)] ">
+          <div className="text-sm px-2">
+            {/* Problem statement section */}
+            {renderProcessedMarkdown()}
 
-            <TabsContent value="description" className="mt-4 text-sm">
-              {/* Problem statement section */}
-              {renderProcessedMarkdown()}
+            {/* Constraints section with visual styling */}
+            <div className="mt-4 mb-4">
+              <h2 className="text-xl font-semibold mb-4">Constraints</h2>
+              <ul className="pl-6 list-disc space-y-2 text-muted-foreground">
+                <li>
+                  2 ≤ nums.length ≤ 10<sup>4</sup>
+                </li>
+                <li>
+                  -10<sup>9</sup> ≤ nums[i] ≤ 10<sup>9</sup>
+                </li>
+                <li>
+                  -10<sup>9</sup> ≤ target ≤ 10<sup>9</sup>
+                </li>
+                <li>Only one valid answer exists</li>
+              </ul>
+            </div>
 
-              {/* Constraints section with visual styling */}
-              <div className="mt-8 mb-4">
-                <h2 className="text-xl font-semibold mb-4">Constraints</h2>
-                <ul className="pl-6 list-disc space-y-2 text-muted-foreground">
-                  <li>
-                    2 ≤ nums.length ≤ 10<sup>4</sup>
-                  </li>
-                  <li>
-                    -10<sup>9</sup> ≤ nums[i] ≤ 10<sup>9</sup>
-                  </li>
-                  <li>
-                    -10<sup>9</sup> ≤ target ≤ 10<sup>9</sup>
-                  </li>
-                  <li>Only one valid answer exists</li>
-                </ul>
-              </div>
-
-              {/* Custom follow-up section */}
-              <Separator className="my-6" />
-              <div className="mt-6">
-                <h3 className="font-medium text-base mb-3">Follow-up</h3>
-                <InfoBox type="tip">
-                  Can you come up with an algorithm that is less than O(n²) time
-                  complexity?
-                </InfoBox>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="hints">
-              <div className="mt-4 space-y-4">
-                {exampleProblem.hints.map((hint, idx) => (
-                  <div key={idx} className="p-3 bg-muted/30 rounded-md">
-                    <div className="text-xs text-muted-foreground mb-1">
-                      Hint {idx + 1}
-                    </div>
-                    <p>{hint}</p>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="solution">
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <div className="rounded-full bg-muted p-3">
-                  <LockIcon className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h3 className="mt-4 text-lg font-medium">Solution Locked</h3>
-                <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-                  The solution will be available after you successfully submit
-                  your answer.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
+            {/* Custom follow-up section */}
+            <Separator className="my-6" />
+            <div className="mt-6">
+              <h3 className="font-medium text-base mb-3">Follow-up</h3>
+              <InfoBox type="tip">
+                Can you come up with an algorithm that is less than O(n²) time
+                complexity?
+              </InfoBox>
+            </div>
+          </div>
         </ScrollArea>
       </Card>
     </div>
