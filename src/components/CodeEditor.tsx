@@ -41,6 +41,15 @@ const SUPPORTED_LANGUAGES = [
   { value: "java", label: "Java" },
 ];
 
+interface CodeEditorProps {
+  initialCode?: string;
+  onCodeChange: (code: string) => void;
+  initialLanguage?: string;
+  onLanguageChange: (language: string) => void;
+  onRun: () => void;
+  onSubmit: () => void;
+}
+
 const Timer = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -225,12 +234,19 @@ const Timer = () => {
   );
 };
 
-export default function CodeEditor() {
+export default function CodeEditor({
+  initialCode = "// Write your code here",
+  onCodeChange,
+  initialLanguage = "javascript",
+  onLanguageChange,
+  onRun,
+  onSubmit,
+}: CodeEditorProps) {
   const { theme: uiTheme } = useTheme();
   const defaultEditorTheme = uiTheme === "dark" ? "twilight" : "github";
 
-  const [code, setCode] = React.useState<string>("// Write your code here");
-  const [language, setLanguage] = React.useState<string>("javascript");
+  const [code, setCode] = React.useState<string>(initialCode);
+  const [language, setLanguage] = React.useState<string>(initialLanguage);
   const [theme, setTheme] = React.useState<string>(defaultEditorTheme);
 
   // Update editor theme when UI theme changes
@@ -238,24 +254,24 @@ export default function CodeEditor() {
     setTheme(uiTheme === "dark" ? "twilight" : "github");
   }, [uiTheme]);
 
+  // Update code when initialCode changes (from parent)
+  useEffect(() => {
+    setCode(initialCode);
+  }, [initialCode]);
+
+  // Update language when initialLanguage changes (from parent)
+  useEffect(() => {
+    setLanguage(initialLanguage);
+  }, [initialLanguage]);
+
   const handleCodeChange = (newValue: string) => {
     setCode(newValue);
+    onCodeChange(newValue);
   };
 
-  const run = () => {
-    console.log("Running code:", {
-      code,
-      language,
-    });
-    // This is where you would execute the code
-  };
-
-  const submit = () => {
-    console.log("Submitting code:", {
-      code,
-      language,
-    });
-    // This is where you would submit the code to your backend
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    onLanguageChange(newLanguage);
   };
 
   return (
@@ -264,9 +280,9 @@ export default function CodeEditor() {
         theme={theme}
         setTheme={setTheme}
         language={language}
-        setLanguage={setLanguage}
-        onRun={run}
-        onSubmit={submit}
+        setLanguage={handleLanguageChange}
+        onRun={onRun}
+        onSubmit={onSubmit}
       />
       <div className="flex-grow">
         <AceEditor
@@ -360,12 +376,12 @@ const EditorNav = ({
           onClick={onRun}
           variant="outline"
           size="sm"
-          className="gap-1"
+          className="h-6 px-2 text-xs gap-1"
         >
           <PlayIcon className="h-3 w-3" />
           Run
         </Button>
-        <Button onClick={onSubmit} size="sm" className="gap-1">
+        <Button onClick={onSubmit} size="sm" className="h-6 px-2 text-xs gap-1">
           <PaperPlaneIcon className="h-3 w-3" />
           Submit
         </Button>
