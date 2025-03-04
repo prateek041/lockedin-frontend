@@ -3,6 +3,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
+import CodeEditor from "./CodeEditor"
 
 export function ProblemWrapper() {
   return (
@@ -19,8 +20,8 @@ export function ProblemWrapper() {
       <ResizablePanel defaultSize={60}>
         <ResizablePanelGroup direction="vertical">
           <ResizablePanel defaultSize={70}>
-            <div className="flex h-full items-center justify-center p-6">
-              <span className="font-semibold">Two</span>
+            <div className="flex h-full items-center justify-center p-2">
+              <CodeEditor />
             </div>
           </ResizablePanel>
           <ResizableHandle />
