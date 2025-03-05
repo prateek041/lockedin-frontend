@@ -18,6 +18,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preload Three.js for performance */}
+        <link
+          rel="preload"
+          href="https://unpkg.com/three@0.156.1/build/three.module.js"
+          as="script"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`${inter.className} antialiased h-screen flex flex-col`}>
         <ThemeProvider
           attribute="class"
