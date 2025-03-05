@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface AudioVisualizerProps {
   // Optionally pass props if needed (e.g., color, size, or audio constraints)
@@ -122,51 +123,35 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   const circleSize = size + amplitude;
   const glowSize = Math.min(amplitude, maxGlow);
 
-  // Inline styling: a black circle with neon glow behind it
-  const circleStyle: React.CSSProperties = {
-    width: `${circleSize}px`,
-    height: `${circleSize}px`,
-    backgroundColor: "#000",
-    borderRadius: "50%",
-    margin: "0 auto",
-    // Box-shadow for a neon effect
-    boxShadow: `0 0 ${glowSize}px ${neonColor}`,
-    transition: "width 0.1s ease, height 0.1s ease, box-shadow 0.1s ease",
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: "#333",
-    color: "#fff",
-    border: "none",
-    padding: "10px 20px",
-    borderRadius: "20px",
-    margin: "10px",
-    cursor: "pointer",
-    boxShadow: `0 0 5px ${neonColor}`,
-    transition: "all 0.2s ease",
-  };
-
   return (
-    <div
-      className=""
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "300px",
-      }}
-    >
-      <div style={circleStyle} />
-      <div style={{ marginTop: "20px" }}>
+    <div className="flex flex-col justify-center items-center min-h-[300px] w-full">
+      {/* Visualizer circle with dynamic styling */}
+      <div
+        className="rounded-full bg-black transition-all duration-100 ease-in-out"
+        style={{
+          width: `${circleSize}px`,
+          height: `${circleSize}px`,
+          boxShadow: `0 0 ${glowSize}px ${neonColor}`,
+        }}
+      />
+
+      <div className="mt-6">
         {!isListening ? (
-          <button onClick={startAudio} style={buttonStyle}>
+          <Button
+            onClick={startAudio}
+            variant="outline"
+            className="transition-all duration-200 hover:bg-muted"
+          >
             Start Listening
-          </button>
+          </Button>
         ) : (
-          <button onClick={stopAudio} style={buttonStyle}>
+          <Button
+            onClick={stopAudio}
+            variant="outline"
+            className="transition-all duration-200 hover:bg-muted"
+          >
             Stop Listening
-          </button>
+          </Button>
         )}
       </div>
     </div>
