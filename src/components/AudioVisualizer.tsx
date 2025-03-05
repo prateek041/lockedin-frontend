@@ -2,22 +2,20 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"; // Assuming you use shadcn's utils
 
 interface AudioVisualizerProps {
-  // Optionally pass props if needed (e.g., color, size, or audio constraints)
-  size?: number; // Base size of the circle
-  neonColor?: string; // Neon glow color
-  secondaryNeonColor?: string; // Secondary neon color for background circle
-  maxGlow?: number; // Maximum glow size
+  size?: number;
+  maxGlow?: number;
   smoothingTimeConstant?: number;
+  className?: string;
 }
 
 const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
-  size = 100,
-  neonColor = "#00FFFF",
-  secondaryNeonColor = "#FF6B00", // Orange neon color
-  maxGlow = 50,
+  size = 120,
+  maxGlow = 60,
   smoothingTimeConstant = 0.8,
+  className,
 }) => {
   const [amplitude, setAmplitude] = useState(0);
   const [isListening, setIsListening] = useState(false);
@@ -120,47 +118,92 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     animate();
   };
 
-  // The circles' sizes and glows scale with amplitude
-  // Front circle (blue)
-  const circleSize = size + amplitude;
-  const glowSize = Math.min(amplitude, maxGlow);
+  // Scale base circle size with amplitude but more subtly
+  const circleSize = size + amplitude * 0.4;
 
-  // Back circle (orange) - more exaggerated effect
-  // Make it slightly larger and more responsive to amplitude
-  const backCircleSize = size - 5 + amplitude * 1.5;
-  const backGlowSize = Math.min(amplitude * 1.8, maxGlow * 1.5);
+  // Create distortion values for the shadows
+  const distortionX = Math.sin(Date.now() / 400) * amplitude * 0.3;
+  const distortionY = Math.cos(Date.now() / 300) * amplitude * 0.3;
+  const distortionX2 = Math.sin(Date.now() / 350) * amplitude * 0.4;
+  const distortionY2 = Math.cos(Date.now() / 250) * amplitude * 0.4;
+  const distortionX3 = Math.sin(Date.now() / 450) * amplitude * 0.35;
+  const distortionY3 = Math.cos(Date.now() / 350) * amplitude * 0.35;
 
-  // Create a "distorted" effect for the back circle by calculating an offset
-  // The back circle will move slightly based on amplitude
-  const distortionOffset = amplitude * 0.3;
-  const randomOffset = Math.sin(Date.now() / 300) * distortionOffset;
-  const randomOffsetY = Math.cos(Date.now() / 200) * distortionOffset;
+  // Calculate shadow sizes based on amplitude
+  const shadowSize1 = Math.min(amplitude * 1.2, maxGlow);
+  const shadowSize2 = Math.min(amplitude * 1.3, maxGlow);
+  const shadowSize3 = Math.min(amplitude * 1.1, maxGlow);
+
+  // Instagram-like gradient shadow colors
+  const instagramPink = "#E1306C";
+  const instagramPurple = "#833AB4";
+  const instagramOrange = "#F77737";
+  const instagramYellow = "#FCAF45";
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-[300px] w-full">
-      {/* Visualizer circles container with relative positioning */}
-      <div className="relative flex items-center justify-center h-[200px] w-[200px]">
-        {/* Background distorted orange circle */}
-        <div
-          className="absolute rounded-full bg-black transition-all duration-75 ease-in-out"
-          style={{
-            width: `${backCircleSize}px`,
-            height: `${backCircleSize}px`,
-            boxShadow: `0 0 ${backGlowSize}px ${secondaryNeonColor}`,
-            transform: `translate(${randomOffset}px, ${randomOffsetY}px)`,
-            opacity: amplitude > 5 ? 0.8 : 0.3, // Only appear clearly when there's sound
-            zIndex: 1,
-          }}
-        />
+    <div
+      className={cn(
+        "flex flex-col justify-center items-center min-h-[300px] w-full",
+        className
+      )}
+    >
+      <div className="relative h-[220px] w-[220px] flex items-center justify-center">
+        {/* Multiple shadow elements that will distort with audio */}
+        {isListening && amplitude > 3 && (
+          <>
+            {/* Instagram-like pink shadow */}
+            <div
+              className="absolute rounded-full opacity-70"
+              style={{
+                width: `${circleSize}px`,
+                height: `${circleSize}px`,
+                boxShadow: `0 0 ${shadowSize1}px ${
+                  shadowSize1 / 2
+                }px ${instagramPink}`,
+                transform: `translate(${distortionX}px, ${distortionY}px)`,
+                transition: "box-shadow 0.1s ease-out",
+                zIndex: 1,
+              }}
+            />
 
-        {/* Foreground primary blue circle */}
+            {/* Instagram-like purple shadow */}
+            <div
+              className="absolute rounded-full opacity-70"
+              style={{
+                width: `${circleSize}px`,
+                height: `${circleSize}px`,
+                boxShadow: `0 0 ${shadowSize2}px ${
+                  shadowSize2 / 2
+                }px ${instagramPurple}`,
+                transform: `translate(${distortionX2}px, ${distortionY2}px)`,
+                transition: "box-shadow 0.1s ease-out",
+                zIndex: 1,
+              }}
+            />
+
+            {/* Instagram-like yellow-orange shadow */}
+            <div
+              className="absolute rounded-full opacity-70"
+              style={{
+                width: `${circleSize}px`,
+                height: `${circleSize}px`,
+                boxShadow: `0 0 ${shadowSize3}px ${shadowSize3 / 2}px ${
+                  amplitude > 15 ? instagramOrange : instagramYellow
+                }`,
+                transform: `translate(${distortionX3}px, ${distortionY3}px)`,
+                transition: "box-shadow 0.1s ease-out",
+                zIndex: 1,
+              }}
+            />
+          </>
+        )}
+
+        {/* Main circle - adapts to light/dark theme */}
         <div
-          className="absolute rounded-full bg-black transition-all duration-100 ease-in-out"
+          className="absolute rounded-full bg-background border border-border z-10 transition-all duration-100 ease-out shadow-sm"
           style={{
             width: `${circleSize}px`,
             height: `${circleSize}px`,
-            boxShadow: `0 0 ${glowSize}px ${neonColor}`,
-            zIndex: 2,
           }}
         />
       </div>
