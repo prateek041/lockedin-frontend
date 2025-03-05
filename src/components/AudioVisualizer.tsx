@@ -18,12 +18,18 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   className,
 }) => {
   const [amplitude, setAmplitude] = useState(0);
+  // Add a smoothed amplitude state for gradual transitions
+  const [smoothedAmplitude, setSmoothedAmplitude] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const animationIdRef = useRef<number | null>(null);
+  const smoothAnimationIdRef = useRef<number | null>(null); // New ref for the smoothing animation
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Keep track of last non-zero amplitude for fade out effect
+  const lastAmplitudeRef = useRef(0);
 
   // Function to start audio capture
   const startAudio = async () => {
@@ -60,7 +66,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
   // Function to stop audio capture
   const stopAudio = () => {
-    if (!isListening) return;
+    // Instead of immediately setting amplitude to 0, we'll let it fade out naturally
+    // through our smoothing effect
 
     if (animationIdRef.current) {
       cancelAnimationFrame(animationIdRef.current);
@@ -79,8 +86,11 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
     analyserRef.current = null;
     dataArrayRef.current = null;
+
+    // Set raw amplitude to 0, but let the smoothed one fade out gradually
     setAmplitude(0);
     setIsListening(false);
+    // Don't cancel the smooth animation here - we want it to fade out naturally
   };
 
   useEffect(() => {
@@ -89,9 +99,55 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     // Cleanup on unmount
     return () => {
       stopAudio();
+      if (smoothAnimationIdRef.current) {
+        cancelAnimationFrame(smoothAnimationIdRef.current);
+        smoothAnimationIdRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fix the smoothing animation to avoid infinite loop
+  useEffect(() => {
+    // Clean up previous animation frame if exists
+    if (smoothAnimationIdRef.current) {
+      cancelAnimationFrame(smoothAnimationIdRef.current);
+    }
+
+    // When isListening goes false, we want a slower fade-out
+    const smoothingFactor = isListening ? 0.15 : 0.05;
+
+    // Save last significant amplitude for smoother transitions
+    if (amplitude > 5) {
+      lastAmplitudeRef.current = amplitude;
+    }
+
+    // Create recursive function for smooth animation
+    const smoothAnimation = () => {
+      // Calculate the new smoothed value with an easing function
+      const diff = amplitude - smoothedAmplitude;
+      const newSmoothedValue = smoothedAmplitude + diff * smoothingFactor;
+
+      setSmoothedAmplitude(newSmoothedValue);
+
+      // Continue animation only while there's a significant difference
+      // or we're in fade-out (not listening but still have amplitude)
+      if (Math.abs(diff) > 0.1 || (!isListening && smoothedAmplitude > 0.1)) {
+        smoothAnimationIdRef.current = requestAnimationFrame(smoothAnimation);
+      }
+    };
+
+    // Start the animation
+    smoothAnimationIdRef.current = requestAnimationFrame(smoothAnimation);
+
+    // Clean up on unmount or when dependencies change
+    return () => {
+      if (smoothAnimationIdRef.current) {
+        cancelAnimationFrame(smoothAnimationIdRef.current);
+        smoothAnimationIdRef.current = null;
+      }
+    };
+  }, [amplitude, isListening]); // Remove smoothedAmplitude from dependencies to avoid infinite loop
 
   // Animation loop to read the analyser data and update amplitude
   const startAnimation = () => {
@@ -118,27 +174,33 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     animate();
   };
 
-  // Scale base circle size with amplitude but more subtly
-  const circleSize = size + amplitude * 0.4;
+  // Scale base circle size with smoothedAmplitude instead of raw amplitude
+  const circleSize = size + smoothedAmplitude * 0.4;
 
-  // Create distortion values for the shadows
-  const distortionX = Math.sin(Date.now() / 400) * amplitude * 0.3;
-  const distortionY = Math.cos(Date.now() / 300) * amplitude * 0.3;
-  const distortionX2 = Math.sin(Date.now() / 350) * amplitude * 0.4;
-  const distortionY2 = Math.cos(Date.now() / 250) * amplitude * 0.4;
-  const distortionX3 = Math.sin(Date.now() / 450) * amplitude * 0.35;
-  const distortionY3 = Math.cos(Date.now() / 350) * amplitude * 0.35;
+  // Create distortion values for the shadows with smoothedAmplitude
+  const distortionX = Math.sin(Date.now() / 400) * smoothedAmplitude * 0.3;
+  const distortionY = Math.cos(Date.now() / 300) * smoothedAmplitude * 0.3;
+  const distortionX2 = Math.sin(Date.now() / 350) * smoothedAmplitude * 0.4;
+  const distortionY2 = Math.cos(Date.now() / 250) * smoothedAmplitude * 0.4;
+  const distortionX3 = Math.sin(Date.now() / 450) * smoothedAmplitude * 0.35;
+  const distortionY3 = Math.cos(Date.now() / 350) * smoothedAmplitude * 0.35;
 
-  // Calculate shadow sizes based on amplitude
-  const shadowSize1 = Math.min(amplitude * 1.2, maxGlow);
-  const shadowSize2 = Math.min(amplitude * 1.3, maxGlow);
-  const shadowSize3 = Math.min(amplitude * 1.1, maxGlow);
+  // Calculate shadow sizes based on smoothedAmplitude
+  const shadowSize1 = Math.min(smoothedAmplitude * 1.2, maxGlow);
+  const shadowSize2 = Math.min(smoothedAmplitude * 1.3, maxGlow);
+  const shadowSize3 = Math.min(smoothedAmplitude * 1.1, maxGlow);
 
   // Instagram-like gradient shadow colors
   const instagramPink = "#E1306C";
   const instagramPurple = "#833AB4";
   const instagramOrange = "#F77737";
   const instagramYellow = "#FCAF45";
+
+  // Calculate opacity based on amplitude for smooth appearance/disappearance
+  const shadowOpacity = Math.min(
+    0.7,
+    Math.max(0, (smoothedAmplitude - 1.5) / 10)
+  );
 
   return (
     <div
@@ -148,12 +210,13 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       )}
     >
       <div className="relative h-[220px] w-[220px] flex items-center justify-center">
-        {/* Multiple shadow elements that will distort with audio */}
-        {isListening && amplitude > 3 && (
+        {/* Multiple shadow elements with smoothed transitions */}
+        {/* Show shadows even when not listening for fade-out effect */}
+        {(smoothedAmplitude > 0.5 || isListening) && (
           <>
             {/* Instagram-like pink shadow */}
             <div
-              className="absolute rounded-full opacity-70"
+              className="absolute rounded-full"
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
@@ -161,14 +224,16 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
                   shadowSize1 / 2
                 }px ${instagramPink}`,
                 transform: `translate(${distortionX}px, ${distortionY}px)`,
-                transition: "box-shadow 0.1s ease-out",
+                opacity: shadowOpacity,
+                transition:
+                  "opacity 0.6s ease-out, box-shadow 0.4s ease-out, transform 0.3s ease-out",
                 zIndex: 1,
               }}
             />
 
             {/* Instagram-like purple shadow */}
             <div
-              className="absolute rounded-full opacity-70"
+              className="absolute rounded-full"
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
@@ -176,34 +241,39 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
                   shadowSize2 / 2
                 }px ${instagramPurple}`,
                 transform: `translate(${distortionX2}px, ${distortionY2}px)`,
-                transition: "box-shadow 0.1s ease-out",
+                opacity: shadowOpacity,
+                transition:
+                  "opacity 0.6s ease-out, box-shadow 0.4s ease-out, transform 0.3s ease-out",
                 zIndex: 1,
               }}
             />
 
             {/* Instagram-like yellow-orange shadow */}
             <div
-              className="absolute rounded-full opacity-70"
+              className="absolute rounded-full"
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
                 boxShadow: `0 0 ${shadowSize3}px ${shadowSize3 / 2}px ${
-                  amplitude > 15 ? instagramOrange : instagramYellow
+                  smoothedAmplitude > 15 ? instagramOrange : instagramYellow
                 }`,
                 transform: `translate(${distortionX3}px, ${distortionY3}px)`,
-                transition: "box-shadow 0.1s ease-out",
+                opacity: shadowOpacity,
+                transition:
+                  "opacity 0.6s ease-out, box-shadow 0.4s ease-out, transform 0.3s ease-out",
                 zIndex: 1,
               }}
             />
           </>
         )}
 
-        {/* Main circle - adapts to light/dark theme */}
+        {/* Main circle - adapts to light/dark theme with smoother transitions */}
         <div
-          className="absolute rounded-full bg-background border border-border z-10 transition-all duration-100 ease-out shadow-sm"
+          className="absolute rounded-full bg-background border border-border z-10 shadow-sm"
           style={{
             width: `${circleSize}px`,
             height: `${circleSize}px`,
+            transition: "width 0.3s ease-out, height 0.3s ease-out",
           }}
         />
       </div>
