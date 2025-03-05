@@ -104,7 +104,6 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         smoothAnimationIdRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fix the smoothing animation to avoid infinite loop
@@ -178,10 +177,10 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   const circleSize = size + smoothedAmplitude * 0.4;
 
   // Create distortion values for the shadows with smoothedAmplitude
-  const distortionX = Math.sin(Date.now() / 400) * smoothedAmplitude * 0.3;
+  const distortionX = Math.sin(Date.now() / 400) * smoothedAmplitude * 0.5;
   const distortionY = Math.cos(Date.now() / 300) * smoothedAmplitude * 0.3;
   const distortionX2 = Math.sin(Date.now() / 350) * smoothedAmplitude * 0.4;
-  const distortionY2 = Math.cos(Date.now() / 250) * smoothedAmplitude * 0.4;
+  const distortionY2 = Math.cos(Date.now() / 250) * smoothedAmplitude * 0.5;
   const distortionX3 = Math.sin(Date.now() / 450) * smoothedAmplitude * 0.35;
   const distortionY3 = Math.cos(Date.now() / 350) * smoothedAmplitude * 0.35;
 
@@ -220,9 +219,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
-                boxShadow: `0 0 ${shadowSize1}px ${
-                  shadowSize1 / 2
-                }px ${instagramPink}`,
+                boxShadow: `0 0 ${shadowSize1}px ${shadowSize1 / 2
+                  }px ${instagramPink}`,
                 transform: `translate(${distortionX}px, ${distortionY}px)`,
                 opacity: shadowOpacity,
                 transition:
@@ -237,9 +235,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
-                boxShadow: `0 0 ${shadowSize2}px ${
-                  shadowSize2 / 2
-                }px ${instagramPurple}`,
+                boxShadow: `0 0 ${shadowSize2}px ${shadowSize2 / 2
+                  }px ${instagramPurple}`,
                 transform: `translate(${distortionX2}px, ${distortionY2}px)`,
                 opacity: shadowOpacity,
                 transition:
@@ -254,9 +251,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
-                boxShadow: `0 0 ${shadowSize3}px ${shadowSize3 / 2}px ${
-                  smoothedAmplitude > 15 ? instagramOrange : instagramYellow
-                }`,
+                boxShadow: `0 0 ${shadowSize3}px ${shadowSize3 / 2}px ${smoothedAmplitude > 15 ? instagramOrange : instagramYellow
+                  }`,
                 transform: `translate(${distortionX3}px, ${distortionY3}px)`,
                 opacity: shadowOpacity,
                 transition:
