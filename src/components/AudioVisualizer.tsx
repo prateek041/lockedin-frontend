@@ -7,6 +7,7 @@ interface AudioVisualizerProps {
   // Optionally pass props if needed (e.g., color, size, or audio constraints)
   size?: number; // Base size of the circle
   neonColor?: string; // Neon glow color
+  secondaryNeonColor?: string; // Secondary neon color for background circle
   maxGlow?: number; // Maximum glow size
   smoothingTimeConstant?: number;
 }
@@ -14,6 +15,7 @@ interface AudioVisualizerProps {
 const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   size = 100,
   neonColor = "#00FFFF",
+  secondaryNeonColor = "#FF6B00", // Orange neon color
   maxGlow = 50,
   smoothingTimeConstant = 0.8,
 }) => {
@@ -118,22 +120,50 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     animate();
   };
 
-  // The circle's size and glow scale with amplitude
-  // You can tweak the multipliers to get the desired bounce effect
+  // The circles' sizes and glows scale with amplitude
+  // Front circle (blue)
   const circleSize = size + amplitude;
   const glowSize = Math.min(amplitude, maxGlow);
 
+  // Back circle (orange) - more exaggerated effect
+  // Make it slightly larger and more responsive to amplitude
+  const backCircleSize = size - 5 + amplitude * 1.5;
+  const backGlowSize = Math.min(amplitude * 1.8, maxGlow * 1.5);
+
+  // Create a "distorted" effect for the back circle by calculating an offset
+  // The back circle will move slightly based on amplitude
+  const distortionOffset = amplitude * 0.3;
+  const randomOffset = Math.sin(Date.now() / 300) * distortionOffset;
+  const randomOffsetY = Math.cos(Date.now() / 200) * distortionOffset;
+
   return (
     <div className="flex flex-col justify-center items-center min-h-[300px] w-full">
-      {/* Visualizer circle with dynamic styling */}
-      <div
-        className="rounded-full bg-black transition-all duration-100 ease-in-out"
-        style={{
-          width: `${circleSize}px`,
-          height: `${circleSize}px`,
-          boxShadow: `0 0 ${glowSize}px ${neonColor}`,
-        }}
-      />
+      {/* Visualizer circles container with relative positioning */}
+      <div className="relative flex items-center justify-center h-[200px] w-[200px]">
+        {/* Background distorted orange circle */}
+        <div
+          className="absolute rounded-full bg-black transition-all duration-75 ease-in-out"
+          style={{
+            width: `${backCircleSize}px`,
+            height: `${backCircleSize}px`,
+            boxShadow: `0 0 ${backGlowSize}px ${secondaryNeonColor}`,
+            transform: `translate(${randomOffset}px, ${randomOffsetY}px)`,
+            opacity: amplitude > 5 ? 0.8 : 0.3, // Only appear clearly when there's sound
+            zIndex: 1,
+          }}
+        />
+
+        {/* Foreground primary blue circle */}
+        <div
+          className="absolute rounded-full bg-black transition-all duration-100 ease-in-out"
+          style={{
+            width: `${circleSize}px`,
+            height: `${circleSize}px`,
+            boxShadow: `0 0 ${glowSize}px ${neonColor}`,
+            zIndex: 2,
+          }}
+        />
+      </div>
 
       <div className="mt-6">
         {!isListening ? (
