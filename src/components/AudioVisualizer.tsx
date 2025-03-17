@@ -177,17 +177,17 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   const circleSize = size + smoothedAmplitude * 0.4;
 
   // Create distortion values for the shadows with smoothedAmplitude
-  const distortionX = Math.sin(Date.now() / 400) * smoothedAmplitude * 0.5;
-  const distortionY = Math.cos(Date.now() / 300) * smoothedAmplitude * 0.3;
-  const distortionX2 = Math.sin(Date.now() / 350) * smoothedAmplitude * 0.4;
-  const distortionY2 = Math.cos(Date.now() / 250) * smoothedAmplitude * 0.5;
-  const distortionX3 = Math.sin(Date.now() / 450) * smoothedAmplitude * 0.35;
-  const distortionY3 = Math.cos(Date.now() / 350) * smoothedAmplitude * 0.35;
+  const distortionX = Math.sin(Date.now() / 400) * smoothedAmplitude * 1;
+  const distortionY = Math.cos(Date.now() / 300) * smoothedAmplitude * 1;
+  const distortionX2 = Math.sin(Date.now() / 350) * smoothedAmplitude * 1;
+  const distortionY2 = Math.cos(Date.now() / 250) * smoothedAmplitude * 1;
+  const distortionX3 = Math.sin(Date.now() / 450) * smoothedAmplitude * 1;
+  const distortionY3 = Math.cos(Date.now() / 350) * smoothedAmplitude * 1;
 
   // Calculate shadow sizes based on smoothedAmplitude
-  const shadowSize1 = Math.min(smoothedAmplitude * 1.2, maxGlow);
-  const shadowSize2 = Math.min(smoothedAmplitude * 1.3, maxGlow);
-  const shadowSize3 = Math.min(smoothedAmplitude * 1.1, maxGlow);
+  const shadowSize1 = Math.min(smoothedAmplitude * 1.5, maxGlow);
+  const shadowSize2 = Math.min(smoothedAmplitude * 1.6, maxGlow);
+  const shadowSize3 = Math.min(smoothedAmplitude * 1.4, maxGlow);
 
   // Instagram-like gradient shadow colors
   const instagramPink = "#E1306C";
@@ -204,18 +204,41 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center items-center min-h-[300px] w-full",
+        "flex py-2 flex-col h-full justify-center items-center w-full",
         className
       )}
     >
-      <div className="relative h-[220px] w-[220px] flex items-center justify-center">
+      <div className="mt-10">
+        {!isListening ? (
+          <div
+            onClick={startAudio}
+            // variant="outline"
+            className="transition-all duration-200 hover:bg-muted"
+          >
+            <h1 className="text-xl">
+              Listening...
+            </h1>
+          </div>
+        ) : (
+          <div
+            onClick={stopAudio}
+            // variant="outline"
+            className="transition-all duration-200 hover:bg-muted"
+          >
+            <h1 className="text-xl">
+              Listening...
+            </h1>
+          </div>
+        )}
+      </div>
+      <div className="relative h-full w-[220px] flex items-center justify-center ">
         {/* Multiple shadow elements with smoothed transitions */}
         {/* Show shadows even when not listening for fade-out effect */}
         {(smoothedAmplitude > 0.5 || isListening) && (
           <>
             {/* Instagram-like pink shadow */}
             <div
-              className="absolute rounded-full"
+              className="absolute rounded-full h-full"
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
@@ -265,7 +288,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
         {/* Main circle - adapts to light/dark theme with smoother transitions */}
         <div
-          className="absolute rounded-full bg-background border border-border z-10 shadow-sm"
+          className="absolute rounded-full bg-foreground border border-border z-10 shadow-sm"
           style={{
             width: `${circleSize}px`,
             height: `${circleSize}px`,
@@ -274,25 +297,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         />
       </div>
 
-      <div className="mt-6">
-        {!isListening ? (
-          <Button
-            onClick={startAudio}
-            variant="outline"
-            className="transition-all duration-200 hover:bg-muted"
-          >
-            Start Listening
-          </Button>
-        ) : (
-          <Button
-            onClick={stopAudio}
-            variant="outline"
-            className="transition-all duration-200 hover:bg-muted"
-          >
-            Stop Listening
-          </Button>
-        )}
-      </div>
+
+
+
     </div>
   );
 };

@@ -289,6 +289,7 @@ export default function CodeEditor({
           style={{ width: "100%", height: "100%" }}
           mode={language}
           theme={theme}
+          fontSize={16}
           value={code}
           onChange={handleCodeChange}
           name="code-editor"

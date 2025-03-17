@@ -1,16 +1,9 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Markdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  vscDarkPlus,
-  vs,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useTheme } from "next-themes";
 import { AlertTriangleIcon, InfoIcon, StarIcon } from "lucide-react";
 import { FC, ReactNode } from "react";
 
@@ -318,19 +311,19 @@ export default function Question() {
 }
 
 // Lock icon for solution tab
-const LockIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className={className}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-    />
-  </svg>
-);
+// const LockIcon = ({ className }: { className?: string }) => (
+//   <svg
+//     xmlns="http://www.w3.org/2000/svg"
+//     fill="none"
+//     viewBox="0 0 24 24"
+//     strokeWidth={1.5}
+//     stroke="currentColor"
+//     className={className}
+//   >
+//     <path
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//       d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+//     />
+//   </svg>
+// );
