@@ -1,15 +1,27 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"; // Assuming you use shadcn's utils
 
+/*
+ * AudioVisualizerProps are the props for that set the default behaviour of the
+ * AudioVisualizer React component.
+*/
+
 interface AudioVisualizerProps {
-  size?: number;
-  maxGlow?: number;
-  smoothingTimeConstant?: number;
-  className?: string;
+  size?: number; // base size of the circle.
+  maxGlow?: number; // maximum size of the glow effect.
+  smoothingTimeConstant?: number; // how smoothly is the audio data processed.
+  className?: string; // custom CSS styling.
 }
+
+/**
+ * AudioVisualizer is a React component that:
+ * - Captures audio from microphone using Web Audio API.
+ * - Analyzes the sound to measure its loudness(amplitude).
+ * - Visualizes it with a circle that grows and glows based on how loud the sound is.
+ * - Toggles on/off with a button.
+*/
 
 const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   size = 120,
@@ -21,6 +33,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   // Add a smoothed amplitude state for gradual transitions
   const [smoothedAmplitude, setSmoothedAmplitude] = useState(0);
   const [isListening, setIsListening] = useState(false);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
@@ -36,6 +49,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
     if (isListening) return; // Prevent duplicate starts
 
     try {
+      // const stream = await navigator.mediaDevices.getUserMedia()
+      // Get User Microphone access.
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
       });
@@ -44,6 +59,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       const audioContext = new AudioContext();
       const source = audioContext.createMediaStreamSource(stream);
 
+      // create an AnalyserNode to extract data from the audio stream.
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048; // Larger fftSize -> more data points
       analyser.smoothingTimeConstant = smoothingTimeConstant;
@@ -168,6 +184,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       const avg = sum / dataArray.length; // average deviation
       setAmplitude(avg);
 
+      // run animate recursively 60 times per second.
       animationIdRef.current = requestAnimationFrame(animate);
     };
     animate();
@@ -216,7 +233,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
             className="transition-all duration-200 hover:bg-muted"
           >
             <h1 className="text-xl">
-              Listening...
+              Start Listening
             </h1>
           </div>
         ) : (
@@ -226,7 +243,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
             className="transition-all duration-200 hover:bg-muted"
           >
             <h1 className="text-xl">
-              Listening...
+              Stop Listening
             </h1>
           </div>
         )}
@@ -238,7 +255,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
           <>
             {/* Instagram-like pink shadow */}
             <div
-              className="absolute rounded-full h-full"
+              className={`absolute rounded-full h-full`}
               style={{
                 width: `${circleSize}px`,
                 height: `${circleSize}px`,
