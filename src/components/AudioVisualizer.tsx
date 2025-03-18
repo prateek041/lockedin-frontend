@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils"; // Assuming you use shadcn's utils
 
+import { io, Socket } from 'socket.io-client';
+
 /*
  * AudioVisualizerProps are the props for that set the default behaviour of the
  * AudioVisualizer React component.
@@ -34,6 +36,9 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   const [smoothedAmplitude, setSmoothedAmplitude] = useState(0);
   const [isListening, setIsListening] = useState(false);
 
+  const socketRef = useRef<Socket | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
@@ -55,6 +60,13 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         audio: true,
       });
       streamRef.current = stream;
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      mediaRecorder.ondataavailable = (event) => {
+        socketRef.current?.emit("audio", event.data)
+      }
+
+      mediaRecorder.start(5000) // record in 5-second chunks
 
       const audioContext = new AudioContext();
       const source = audioContext.createMediaStreamSource(stream);
@@ -84,6 +96,8 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   const stopAudio = () => {
     // Instead of immediately setting amplitude to 0, we'll let it fade out naturally
     // through our smoothing effect
+    if (socketRef.current) socketRef.current.disconnect();
+
 
     if (animationIdRef.current) {
       cancelAnimationFrame(animationIdRef.current);
@@ -111,10 +125,18 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
   useEffect(() => {
     // No auto-start. The user will click play to start.
+    socketRef.current = io('http://localhost:9090', { transports: ['websocket'] });
+    socketRef.current.on('connect', () => console.log('Connected to server'));
 
     // Cleanup on unmount
     return () => {
+      // disconnect socket connection
+      if (socketRef.current) socketRef.current.disconnect();
+
+      // stop processing audio
       stopAudio();
+
+      // stop animations for audio.
       if (smoothAnimationIdRef.current) {
         cancelAnimationFrame(smoothAnimationIdRef.current);
         smoothAnimationIdRef.current = null;
